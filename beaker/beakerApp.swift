@@ -1,17 +1,13 @@
-//
-//  beakerApp.swift
-//  beaker
-//
-//  Created by Jay Dharmadhikari on 7/5/25.
-//
-
 import SwiftUI
 
 @main
 struct beakerApp: App {
+    @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
+
     var body: some Scene {
-        WindowGroup {
-            ContentView()
+        // No default WindowGroup — window will be managed manually
+        Settings {
+            EmptyView()
         }
     }
 }
