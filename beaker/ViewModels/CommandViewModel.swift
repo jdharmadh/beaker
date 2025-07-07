@@ -4,8 +4,8 @@ import Combine
 class CommandViewModel: ObservableObject {
     @Published var currentCommand: RunnableCommand = TerminalCommand(command: "", plaintext: "")
 
-    private var cancellables = Set<AnyCancellable>()
-    private let provider: CommandProvider
+    var cancellables = Set<AnyCancellable>()
+    let provider: CommandProvider
 
     init(provider: CommandProvider) {
         self.provider = provider

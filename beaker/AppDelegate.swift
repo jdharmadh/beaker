@@ -5,33 +5,39 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     var window: NSWindow!
 
     func applicationDidFinishLaunching(_ notification: Notification) {
-        let provider = DynamicCommandProvider(apiClient: GroqAPIClient())
-//        let provider = StaticCommandProvider()
-        let viewModel = CommandViewModel(provider: provider)
-        let contentView = ContentView(viewModel: viewModel)
+        Task { @MainActor in
+            let appVM = await AppViewModel.create()
+            let contentView = ContentView(appVM: appVM)
 
-        window = NSWindow(
-            contentRect: NSRect(x: NSScreen.main!.visibleFrame.maxX - 400,
-                                y: NSScreen.main!.visibleFrame.maxY - 200,
-                                width: 210,  // wider width
-                                height: 150),
-            styleMask: [.borderless],
-            backing: .buffered,
-            defer: false
-        )
+            window = FocusableWindow(
+                contentRect: NSRect(x: NSScreen.main!.visibleFrame.maxX - 400,
+                                    y: NSScreen.main!.visibleFrame.maxY - 360,
+                                    width: 400,
+                                    height: 350),
+                styleMask: [.borderless],
+                backing: .buffered,
+                defer: false
+            )
 
+            window.isOpaque = false
+            window.backgroundColor = .clear
+            window.level = .screenSaver
+            window.titleVisibility = .hidden
+            window.titlebarAppearsTransparent = true
+            window.isMovableByWindowBackground = true
+            window.isReleasedWhenClosed = false
+            window.ignoresMouseEvents = false
+            window.collectionBehavior = [.canJoinAllSpaces, .stationary, .ignoresCycle]
+            window.hasShadow = true
+            
 
-        window.isOpaque = false
-        window.backgroundColor = .clear
-        window.level = .screenSaver
-        window.titleVisibility = .hidden
-        window.titlebarAppearsTransparent = true
-        window.isMovableByWindowBackground = true
-        window.ignoresMouseEvents = false
-        window.collectionBehavior = [.canJoinAllSpaces, .stationary, .ignoresCycle]
-        window.hasShadow = true
+            window.contentView = NSHostingView(rootView: contentView)
+            
+            window.contentResizeIncrements = NSSize(width: 1, height: 1)
+            window.styleMask.insert(.resizable) // Required for autoresize to work
 
-        window.contentView = NSHostingView(rootView: contentView)
-        window.makeKeyAndOrderFront(nil)
+            window.makeKeyAndOrderFront(nil)
+            window.makeFirstResponder(nil) // Ensure text fields can get focus
+        }
     }
 }

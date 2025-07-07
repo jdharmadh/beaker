@@ -1,6 +1,6 @@
 import SwiftUI
 
-struct ContentView: View {
+struct CommandModeView: View {
     @StateObject var viewModel: CommandViewModel
     @State private var dragStart: CGPoint?
     @State private var dragMoved = false
@@ -59,6 +59,7 @@ struct ContentView: View {
     }
 
     private func moveWindow(by translation: CGSize) {
+        print("Moving window!")
         if let window = NSApp.windows.first {
             let currentOrigin = window.frame.origin
             let newOrigin = CGPoint(

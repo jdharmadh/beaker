@@ -3,20 +3,19 @@ import Combine
 import AppKit
 class DynamicCommandProvider: ObservableObject, CommandProvider {
     @Published private(set) var commands: [RunnableCommand] = []
-
     private var timer: Timer?
     private let apiClient: GroqAPIClient
 
     init(apiClient: GroqAPIClient) {
         self.apiClient = apiClient
-        startPolling()
     }
 
     func getCommands() -> [RunnableCommand] {
         return commands
     }
 
-    private func startPolling() {
+    func start() {
+        guard timer == nil else { return }
         timer = Timer.scheduledTimer(withTimeInterval: 3, repeats: true) { [weak self] _ in
             Task {
                 await self?.fetchNewCommand()
@@ -25,11 +24,16 @@ class DynamicCommandProvider: ObservableObject, CommandProvider {
         timer?.fire()
     }
 
+    func stop() {
+        timer?.invalidate()
+        timer = nil
+    }
+
     func fetchNewCommand() async {
         do {
             let screenshotURL = try await ScreenshotHelper.takeScreenshot()
             let prompt = Self.systemPrompt
-            let response = try await apiClient.callModel(withImageAt: screenshotURL, prompt: prompt)
+            let response = try await apiClient.callImageModel(withImageAt: screenshotURL, prompt: prompt)
 
             if let command = Self.parseCommand(from: response) {
                 DispatchQueue.main.async {
