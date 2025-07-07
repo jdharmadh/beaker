@@ -56,6 +56,63 @@ struct MuteVolumeCommand: RunnableCommand, Decodable {
     }
 }
 
+struct LaunchAppCommand: RunnableCommand, Decodable {
+    let appName: String
+    let plaintext: String
+
+    func run() {
+        let script = "tell application \"\(appName)\" to activate"
+        runAppleScript(script)
+    }
+}
+
+struct SetVolumeCommand: RunnableCommand, Decodable {
+    let volume: Int
+    let plaintext: String
+
+    func run() {
+        let clampedVolume = max(0, min(100, volume))
+        let script = "set volume output volume \(clampedVolume)"
+        runAppleScript(script)
+    }
+}
+
+struct QuitAppCommand: RunnableCommand, Decodable {
+    let appName: String
+    let plaintext: String
+
+    func run() {
+        let script = "tell application \"\(appName)\" to quit"
+        runAppleScript(script)
+    }
+}
+
+struct SleepCommand: RunnableCommand, Decodable {
+    let plaintext: String = "Put the computer to sleep"
+
+    func run() {
+        let script = """
+        tell application "System Events"
+            sleep
+        end tell
+        """
+        runAppleScript(script)
+    }
+}
+
+struct NotificationCommand: RunnableCommand, Decodable {
+    let title: String
+    let message: String
+    let plaintext: String
+
+    func run() {
+        let script = """
+        display notification "\(message)" with title "\(title)"
+        """
+        runAppleScript(script)
+    }
+}
+
 private func runAppleScript(_ script: String) {
     let process = Process()
     process.launchPath = "/usr/bin/osascript"
